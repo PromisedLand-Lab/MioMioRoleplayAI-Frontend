@@ -1,0 +1,12 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+
+# 环境与系统文件
+.env.local
+.env.*.local
+*.local
+.DS_Store
+Thumbs.db
