@@ -34,7 +34,15 @@ function pickModel(n) { modelForm.value.model_name = n; showModelCandidates.valu
 
 function toggleProviderList() { showProviderList.value = !showProviderList.value }
 function hideProviderList() { showProviderList.value = false }
-function pickProvider(v) { modelForm.value.provider = v; showProviderList.value = false }
+function pickProvider(v) {
+  modelForm.value.provider = v
+  // 选择供应商后自动填充其默认接口地址（仅当尚未填写时）
+  const p = PROVIDERS.find((x) => x.value === v)
+  if (p && p.default_base_url && !modelForm.value.base_url) {
+    modelForm.value.base_url = p.default_base_url
+  }
+  showProviderList.value = false
+}
 
 function openModelForm(m = null) {
   editingModelId.value = m ? m.id : null

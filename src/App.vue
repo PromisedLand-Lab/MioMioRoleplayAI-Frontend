@@ -5,6 +5,7 @@ import { toast } from './store'
 import Sidebar from './components/Sidebar.vue'
 import ChatView from './components/ChatView.vue'
 import CharactersView from './components/CharactersView.vue'
+import GroupView from './components/GroupView.vue'
 import ModelsView from './components/ModelsView.vue'
 import ConfirmModal from './components/ConfirmModal.vue'
 import Toast from './components/Toast.vue'
@@ -71,9 +72,11 @@ onMounted(async () => {
       <ChatView v-show="view === 'chat'" :character="currentCharacter" />
       <CharactersView v-show="view === 'characters'"
                       :characters="characters"
+                      :models="models"
                       @select-character="selectCharacter"
                       @reload="loadCharacters"
                       @deleted="handleCharacterDeleted" />
+      <GroupView v-show="view === 'groups'" :characters="characters" @reload="loadCharacters" />
       <ModelsView v-show="view === 'models'" :models="models" @reload="loadModels" />
     </main>
     <ConfirmModal />

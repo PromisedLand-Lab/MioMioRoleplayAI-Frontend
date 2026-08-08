@@ -7,6 +7,7 @@ import CharacterModal from './CharacterModal.vue'
 
 const props = defineProps({
   characters: { type: Array, default: () => [] },
+  models: { type: Array, default: () => [] },
 })
 const emit = defineEmits(['select-character', 'reload', 'deleted'])
 
@@ -64,6 +65,7 @@ async function delCharacter(c) {
     </div>
 
     <CharacterModal v-if="charModalVisible" :char="characters.find((c) => c.id === editingCharId) || null"
+                    :models="models"
                     @close="closeCharModal" @saved="handleSaved" />
   </section>
 </template>

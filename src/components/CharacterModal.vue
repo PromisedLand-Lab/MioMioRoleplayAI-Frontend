@@ -6,6 +6,7 @@ import { toast } from '../store'
 
 const props = defineProps({
   char: { type: Object, default: null },
+  models: { type: Array, default: () => [] },
 })
 const emit = defineEmits(['close', 'saved'])
 
@@ -17,6 +18,7 @@ const completing = ref(false)
 watch(() => props.char, (c) => {
   charForm.value = {}
   if (c) CHAR_FIELDS.forEach((k) => { charForm.value[k] = c[k] || '' })
+  charForm.value.model_id = c ? (c.model_id || 0) : 0
   tplIndex.value = ''
   charFormMsg.value = ''
 }, { immediate: true })
@@ -54,6 +56,7 @@ async function autoComplete() {
 async function saveCharacter() {
   const data = {}
   CHAR_FIELDS.forEach((k) => { data[k] = (charForm.value[k] || '').trim() })
+  data.model_id = Number(charForm.value.model_id || 0)
   if (!data.name) { toast('请输入角色名称', true); return }
   try {
     if (props.char) {
@@ -107,6 +110,13 @@ async function saveCharacter() {
         <label>背景故事<textarea v-model.trim="charForm.backstory" rows="3" placeholder="角色的过往经历"></textarea></label>
         <label>行为规则<textarea v-model.trim="charForm.behavior_rules" rows="2" placeholder="角色在对话中应遵守的规则"></textarea></label>
         <label>起始情景<textarea v-model.trim="charForm.opening_scene" rows="3" placeholder="对话开始的场景描述"></textarea></label>
+        <label>使用模型
+          <select v-model="charForm.model_id">
+            <option :value="0">跟随默认模型</option>
+            <option v-for="m in models" :key="m.id" :value="m.id">{{ m.name }}{{ m.is_default ? '（默认）' : '' }}</option>
+          </select>
+          <small>每个角色可单独指定对话使用的模型，不设置则使用全局默认模型</small>
+        </label>
         <div class="form-actions">
           <span class="form-msg">{{ charFormMsg }}</span>
           <button type="submit" class="btn btn-primary">保存角色</button>

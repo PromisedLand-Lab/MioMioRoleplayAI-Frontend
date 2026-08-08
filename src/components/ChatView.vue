@@ -3,7 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { api } from '../api'
 import { MEM_KIND } from '../constants'
 import { askConfirm, toast } from '../store'
-import { hideOnError, renderContent } from '../utils'
+import { hideOnError, renderSegments } from '../utils'
 
 const props = defineProps({
   character: { type: Object, default: null },
@@ -291,7 +291,7 @@ function memKindName(kind) { return MEM_KIND[kind] || kind }
             <div class="msg-images" v-if="m.images && m.images.length">
               <img v-for="(img, idx) in m.images" :key="idx" :src="img" alt="图片" @error="hideOnError">
             </div>
-            <div class="bubble" :class="{ narration: m.msg_type === 'narration' }" v-html="renderContent(m.content)"></div>
+            <div class="bubble" :class="{ narration: m.msg_type === 'narration' }" v-html="renderSegments(m.content)"></div>
           </div>
         </div>
         <form class="chat-input" @submit.prevent="sendDraft">

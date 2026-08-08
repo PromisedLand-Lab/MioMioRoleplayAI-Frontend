@@ -33,6 +33,7 @@ function pickDefaultModel(m) {
     <nav class="nav">
       <button class="nav-item" :class="{ active: view === 'chat' }" @click="emit('set-view', 'chat')">对话</button>
       <button class="nav-item" :class="{ active: view === 'characters' }" @click="emit('set-view', 'characters')">角色</button>
+      <button class="nav-item" :class="{ active: view === 'groups' }" @click="emit('set-view', 'groups')">社群</button>
       <button class="nav-item" :class="{ active: view === 'models' }" @click="emit('set-view', 'models')">模型</button>
     </nav>
     <div class="sidebar-section">

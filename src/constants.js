@@ -35,9 +35,15 @@ export const CHAR_FIELDS = [
 // 记忆类型中文名
 export const MEM_KIND = { custom: '自定义', event: '事件', person: '人物' }
 
-// 模型供应商
+// 模型供应商（default_base_url 为选择该供应商后自动填充的默认接口地址）
 export const PROVIDERS = [
-  { value: 'ollama', label: 'Ollama' },
-  { value: 'openai', label: 'OpenAI 兼容平台' },
-  { value: 'custom', label: '自定义接口' },
+  { value: 'ollama', label: 'Ollama（本地）', default_base_url: 'http://localhost:11434' },
+  { value: 'openai', label: 'OpenAI（官方）', default_base_url: 'https://api.openai.com/v1' },
+  { value: 'deepseek', label: 'DeepSeek', default_base_url: 'https://api.deepseek.com/v1' },
+  { value: 'byteplus', label: '字节跳动（豆包/火山方舟）', default_base_url: 'https://ark.cn-beijing.volces.com/api/v3' },
+  { value: 'zhipu', label: '智谱 AI（GLM）', default_base_url: 'https://open.bigmodel.cn/api/paas/v4' },
+  { value: 'kimi', label: '月之暗面 Kimi', default_base_url: 'https://api.moonshot.cn/v1' },
+  { value: 'qwen', label: '阿里通义千问', default_base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  { value: 'openai_compat', label: 'OpenAI 兼容平台', default_base_url: '' },
+  { value: 'custom', label: '自定义接口', default_base_url: '' },
 ]
