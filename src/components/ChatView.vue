@@ -292,9 +292,10 @@ async function activateMessage(messageId) {
 }
 
 // 回复分支信息：只有 user 消息且其下拥有 ≥2 个子消息（assistant 回复 / 重新生成版）才显示，
-// 切换该消息下的回复版本；assistant 消息不允许作为分支点
+// 切换该消息下的回复版本；assistant 消息不允许作为分支点。
+// 编辑链成员（edit_group 非 0）不显示回复分支条：其回复重新生成=新增链版本，由版本条负责切换。
 function branchInfo(m) {
-  if (m.sender !== 'user') return null
+  if (m.sender !== 'user' || m.edit_group) return null
   const children = messages.value.filter((c) => c.parent_id === m.id)
   if (children.length < 2) return null
   const pathIdx = activePath.value.indexOf(m.id)
@@ -322,9 +323,9 @@ function switchBranch(m, dir) {
   if (!info) return
   if ((dir < 0 && info.current <= 1) || (dir > 0 && info.current >= info.count)) return
   const next = info.current - 1 + dir
-  // 激活目标分支时下钻到该分支的最深叶子：否则 RebuildActivePath 只重建到顶层子消息，
-  // 该分支后续（如 assistant 回复）会被遗漏不渲染
-  activateMessage(deepestLeafOf(info.children[next]).id)
+  // 后端 /activate 会沿「最后活跃子节点」链接下钻到目标分支的最深叶子，
+  // 切走再切回同一分支时可恢复该分支下最后活跃的深层子分支
+  activateMessage(info.children[next].id)
 }
 
 // 切换编辑链版本：dir = -1 上一个 / 1 下一个。不允许循环切换；激活目标版本分支的最深叶子
@@ -335,22 +336,8 @@ function switchVersion(m, dir) {
   if (!info) return
   if ((dir < 0 && info.current <= 1) || (dir > 0 && info.current >= info.count)) return
   const next = info.current - 1 + dir
-  activateMessage(deepestLeafOf(info.versions[next]).id)
-}
-
-// 沿子树下钻到某分支的最深后代节点（优先沿当前活跃路径；无子节点则为自身）
-function deepestLeafOf(node) {
-  let cur = node
-  while (true) {
-    const children = messages.value.filter((c) => c.parent_id === cur.id)
-    if (children.length === 0) return cur
-    const pathIdx = activePath.value.indexOf(cur.id)
-    let next = null
-    if (pathIdx >= 0) {
-      next = children.find((c) => c.id === activePath.value[pathIdx + 1]) || null
-    }
-    cur = next || children[0]
-  }
+  // 后端 /activate 会下钻到目标版本分支的最深叶子（同上）
+  activateMessage(info.versions[next].id)
 }
 
 // ---- 编辑（user 消息：气泡按钮 / 移动端长按） ----
@@ -389,7 +376,15 @@ async function regenerate(m) {
   cancelEdit()
   if (streaming.value) { toast('正在生成回复，请稍候', true); return }
   if (!currentSession.value) { toast('请先选择角色', true); return }
-  // 本地模拟：同父节点下新增 assistant 版本并接管活跃路径（流式结束后全量刷新对齐）
+  const parent = messages.value.find((x) => x.id === m.parent_id)
+  // 编辑链成员的回复：重新生成 = 以相同用户内容新增一个链版本（版本条 x/N 增长），
+  // 走编辑流发送（挂链根父下 + 携带 edit_group），不再在版本下产生回复分支
+  if (parent && parent.edit_group) {
+    const info = editGroupInfo(parent)
+    sendMessage(parent.content, parent.images || [], info.parentId, info.group)
+    return
+  }
+  // 普通消息：同父节点下新增 assistant 版本并接管活跃路径（流式结束后全量刷新对齐）
   const asstTmpId = --localSeq.value
   const asstKey = 'm' + (msgKey.value++)
   messages.value.push({ id: asstTmpId, parent_id: m.parent_id, sender: 'assistant', content: '', images: [], msg_type: '', streaming: true, key: asstKey })
